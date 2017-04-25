@@ -36,7 +36,7 @@ int ff_parse(char *str)
     printf("Container filename     :%s\n",        fmt_ctx->filename);
     printf("Container input format :%s\n",   fmt_ctx->iformat->name);
     printf("Container nb_stream    :%d\n",      fmt_ctx->nb_streams);
-    printf("Container duration     :%llu\n",      fmt_ctx->duration);
+    printf("Container duration     :%llu\n",      (long long unsigned int)fmt_ctx->duration);
 
     int video_stream_idx = av_find_best_stream(fmt_ctx, AVMEDIA_TYPE_VIDEO, -1, -1, NULL, 0);
     if(video_stream_idx >= 0){
@@ -44,12 +44,12 @@ int ff_parse(char *str)
         printf("=================================\n");
         printf("parse Video info:\n");
         printf("=================================\n");
-        printf("Video nb_frames      :%lld\n", video_stream->nb_frames);
+        printf("Video nb_frames      :%lld\n", (long long int)video_stream->nb_frames);
         printf("Video codec_id       :%d\n", video_stream->codec->codec_id);
         printf("video codec_name     :%s\n", avcodec_get_name(video_stream->codec->codec_id));
         printf("Video width x height :%d x %d\n", video_stream->codec->width, video_stream->codec->height);
         printf("Video pix_fmt        :%d\n", video_stream->codec->pix_fmt);
-        printf("Video bitrate        :%lld kb/s\n", video_stream->codec->bit_rate / 100);
+        printf("Video bitrate        :%lld kb/s\n", (long long int)video_stream->codec->bit_rate / 100);
         printf("Video avg_frame_rate :%d fps\n", video_stream->avg_frame_rate.num/video_stream->avg_frame_rate.den);
     }
 
@@ -65,8 +65,8 @@ int ff_parse(char *str)
         printf("Audio channels       :%d\n", audio_stream->codec->channels);
         printf("Audio sample_fmt     :%d\n", audio_stream->codec->sample_fmt);
         printf("Audio frame_size     :%d\n", audio_stream->codec->frame_size);
-        printf("Audio nb_frames      :%lld\n", audio_stream->nb_frames);
-        printf("Audio bitrate        :%lld\n", (int64_t)audio_stream->codec->bit_rate / 100);
+        printf("Audio nb_frames      :%lld\n", (long long int)audio_stream->nb_frames);
+        printf("Audio bitrate        :%lld\n", (long long int)audio_stream->codec->bit_rate / 100);
     }
     
     return TRUE;
