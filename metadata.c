@@ -24,6 +24,9 @@ int main(int argc, char **argv)
     if((ret = avformat_open_input(&fmt_ctx, argv[1], NULL, NULL)))
         return ret;
 
+    printf("AVDictionary count %d\n", 
+           av_dict_count(fmt_ctx->metadata));
+
     while((tag = av_dict_get(fmt_ctx->metadata, "", tag, AV_DICT_IGNORE_SUFFIX)))
         printf("%s=%s\n", tag->key, tag->value);
 

@@ -178,8 +178,31 @@ int main(int argc, char **argv)
 	int ret = 0,got_frame;
 	
 	if(argc != 4 && argc != 5){
-		printf("usage error\n");
+		fprintf(stderr, "usage: %s [-refcount=<old|new_norefcount|new_refcount>] "
+                "input_file video_output_file audio_output_file\n"
+                "API example program to show how to read frames from an input file.\n"
+                "This program reads frames from a file, decodes them, and writes decoded\n"
+                "video frames to a rawvideo file named video_output_file, and decoded\n"
+                "audio frames to a rawaudio file named audio_output_file.\n\n"
+                "If the -refcount option is specified, the program use the\n"
+                "reference counting frame system which allows keeping a copy of\n"
+                "the data for longer than one decode call. If unset, it's using\n"
+                "the classic old method.\n"
+                "\n", argv[0]);
+        exit(1);
 	}
+
+    if(argc == 5){
+        const char *mode = argv[1] + strlen("-refcount="); 
+        if(!strcmp(mode, "old"))                  api_mode = API_MODE_OLD;
+        else if(!strcmp(mode, "new_norefcount"))  api_mode = API_MODE_NEW_API_NO_REF_COUNT;
+        else if(!strcmp(mode, "new_refcount"))    api_mode = API_MODE_NEW_API_REF_COUNT;
+        else{
+            fprintf(stderr, "unknow mode '%s'\n", mode);
+            exit(1);
+        }
+        argv++;
+    }
 
     src_filename = argv[1];
     video_dst_filename = argv[2];
