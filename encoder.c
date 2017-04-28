@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <libavformat/avformat.h>
 #include <libavcodec/avcodec.h>
 #include <libavutil/avutil.h>
@@ -13,10 +15,28 @@ static int frameHeight   = 0;
 static int bitRate       = 0;
 static int frameToEncode = 0;
 
-void parse_argv(char **argv)
+static enum AVCodecID codec_id = AV_CODEC_ID_NONE;
+static char *strcodec = NULL;
+
+void parse_argv(int argc, char **argv)
 {
-    InputFileName  = argv[1];
-    OutputFileName = argv[2];
+    int i;
+
+    for(i = 1; i < argc; i++){
+        printf("argv %d : %s\n", i, argv[i]);
+        if(!strcmp(argv[i], "-i")) InputFileName  = argv[++i];
+        if(!strcmp(argv[i], "-o")) OutputFileName = argv[++i];
+        if(!strcmp(argv[i], "-codec")){
+            i++;
+            if(!strcmp(argv[i], "264"))   { codec_id   = AV_CODEC_ID_H264; strcodec = "264";}
+            if(!strcmp(argv[i], "265"))   { codec_id   = AV_CODEC_ID_H265; strcodec = "265";}
+            if(!strcmp(argv[i], "mpeg1")) { codec_id   = AV_CODEC_ID_MPEG1VIDEO; strcodec = "mpeg1";}
+            if(!strcmp(argv[i], "mpeg2")) { codec_id   = AV_CODEC_ID_MPEG1VIDEO; strcodec = "mpeg2";}
+        }
+        if(!strcmp(argv[i], "-w")) frameWidth  = atoi(argv[++i]);
+        if(!strcmp(argv[i], "-h")) frameHeight = atoi(argv[++i]);
+    }
+
 
     pInput_File = fopen(InputFileName, "rb+");
     if(!pInput_File){
@@ -29,6 +49,8 @@ void parse_argv(char **argv)
         fprintf(stderr, "open output file fail\n");
         return;
     }
+
+    printf("input %s output %s codec %s\n", InputFileName, OutputFileName, strcodec);
 
     return;
 }
@@ -43,19 +65,18 @@ int main(int argc, char **argv)
     AVFrame *frame = NULL;
     AVPacket pkt;
 
-    if(argc != 3){
-        fprintf(stderr, "Usage:%s <inputfilename> <outputfilename> \n", 
-                argv[0]); 
+    if(argc < 5){
+        fprintf(stderr, "Usage:%s -i <inputfilename> -o <outputfilename> [-codec (264|265|mpeg1|mpeg2)]\n", argv[0]); 
         exit(1);
     }
 
     //parse argument
-    parse_argv(argv);
+    parse_argv(argc, argv);
 
     av_register_all();
     avcodec_register_all();
 
-    codec = avcodec_find_encoder(AV_CODEC_ID_MPEG2VIDEO);
+    codec = avcodec_find_encoder(codec_id);
     if(!codec){
         fprintf(stderr, "Could not find the encoder\n");
         return -1;
@@ -68,8 +89,8 @@ int main(int argc, char **argv)
     }
 
     codecCtx->bit_rate = 400000;
-    codecCtx->width    = 352;
-    codecCtx->height   = 288;
+    codecCtx->width    = frameWidth;
+    codecCtx->height   = frameHeight;
     codecCtx->time_base = (AVRational){1, 25};
     codecCtx->gop_size  = 10;
     codecCtx->max_b_frames = 1;
@@ -102,7 +123,7 @@ int main(int argc, char **argv)
     }
 
 
-    for(i = 0; i < 25; i++){
+    for(i = 0; i < 98; i++){
         //init AVPacket
         av_init_packet(&pkt); 
         pkt.data = NULL;
@@ -111,19 +132,27 @@ int main(int argc, char **argv)
         fflush(stdout);
         //prepare a dummy image
         /*Y*/
+        /*
         for(y = 0; y < codecCtx->height; y++){
             for(x = 0; x < codecCtx->width; x++){
                 frame->data[0][y*frame->linesize[0] + x] = x + y + i*3;
             }
         }
+        */
 
         /*Cb and Cr*/
+        /*
         for(y = 0; y < codecCtx->height/2; y++){
             for(x = 0; x < codecCtx->width/2; x++){
                 frame->data[1][y*frame->linesize[1] + x] = 128 + y + i*2;
                 frame->data[2][y*frame->linesize[2] + x] = 64 + x + i*5;
             }
         }
+        */
+        fread(frame->data[0], 1, codecCtx->height * codecCtx->width, pInput_File);
+        fread(frame->data[1], 1, (codecCtx->height/2) * (codecCtx->width/2), pInput_File);
+        fread(frame->data[2], 1, (codecCtx->height/2) * (codecCtx->width/2), pInput_File);
+
 
         frame->pts = i;
 
