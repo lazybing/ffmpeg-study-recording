@@ -2,22 +2,23 @@
 CC = gcc
 
 DIR_INC = /usr/local/include
-LIBS = -lavformat -lavdevice -lavcodec -lswscale -lswresample -lavutil -lavfilter -lpthread -lz -lm -lva -lx264 -lx265
 DIR_LIB = /usr/local/lib
+LIBS    = -lavfilter -lpostproc -lavformat -lavcodec -lavdevice -lswscale -lswresample -lavutil -lpthread -lz -lm -lva -lx264 -lx265
 
 ## source file path
 SRC_PATH := .
 
 all:
-##	$(CC) -g demuxing_decoding.c -o demuxing_decoding -L$() -I$(DIR_INC) $(LIBS)
-##	$(CC) -g metadata.c -o metadata -L$() -I$(DIR_INC) $(LIBS)
-##	$(CC) -g container_parse.c -o container_parse -L$() -I$(DIR_INC) $(LIBS)
-##	$(CC) -g decoder.c -o decoder -L$() -I$(DIR_INC) $(LIBS)
-##	$(CC) -g encoder.c -o encoder -L$() -I$(DIR_INC) $(LIBS)
-	$(CC) -g demuxer.c -o demuxer -L$() -I$(DIR_INC) $(LIBS)
+##	$(CC) -O0 -g demuxing_decoding.c -o demuxing_decoding -L$(DIR_LIB) -I$(DIR_INC) $(LIBS)
+##	$(CC) -O0 -g metadata.c -o metadata -L$(DIR_LIB) -I$(DIR_INC) $(LIBS)
+##	$(CC) -O0 -g container_parse.c -o container_parse -L$(DIR_LIB) -I$(DIR_INC) $(LIBS)
+##	$(CC) -O0 -g decoder.c -o decoder -L$(DIR_LIB) -I$(DIR_INC) $(LIBS)
+##	$(CC) -O0 -g encoder.c -o encoder -L$(DIR_LIB) -I$(DIR_INC) $(LIBS)
+##	$(CC) -O0 -g demuxer.c -o demuxer -L$(DIR_LIB) -I$(DIR_INC) $(LIBS)
+	$(CC) -O0 -g filter.c -o filter -L$(DIR_LIB) -I$(DIR_INC) $(LIBS)
 
 clean:
-	rm demuxing_decoding metadata container_parse encoder decoder
+	rm demuxing_decoding metadata container_parse encoder decoder demuxer
 
 .PHONY:clean 
 	
