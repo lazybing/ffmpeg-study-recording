@@ -157,6 +157,8 @@ void write_yuv_to_outfile(const AVFrame *frame_out, FILE *pfdOutput)
 {
     if(frame_out->format == AV_PIX_FMT_YUV420P)
     {
+        fwrite(frame_out->data[0], 1, frame_out->height * frame_out->width * 3 / 2, pfdOutput);
+        /*
         for(int i=0;i<frame_out->height;i++) {  
             fwrite(frame_out->data[0]+frame_out->linesize[0]*i,1,frame_out->width,pfdOutput);  
         }  
@@ -166,6 +168,7 @@ void write_yuv_to_outfile(const AVFrame *frame_out, FILE *pfdOutput)
         for(int i=0;i<frame_out->height/2;i++) {  
             fwrite(frame_out->data[2]+frame_out->linesize[2]*i,1,frame_out->width/2,pfdOutput);  
         }  
+        */
     }
 }
 
