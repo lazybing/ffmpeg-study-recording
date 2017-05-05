@@ -11,28 +11,14 @@ static FILE *pOutput_File = NULL;
 static char *Input_FileName  = NULL;
 static char *Output_FileName = NULL;
 
-static void pgm_save(unsigned char *buf, int wrap, 
-                     int xsize, int ysize, char *filename)
-{
-    FILE *fd;
-    int i;
-    fd = fopen(filename, "wb+");
-    fprintf(fd, "P5\n%d %d\n %d\n", xsize, ysize, 255);
-
-    for(i = 0; i < ysize; i++){
-        fwrite(buf + i*wrap, 1, xsize, fd);
-    }
-    fclose(fd);
-}
-
 static int decode_write_frame(const char *outfilename, AVCodecContext *avctx,
                               AVFrame *frame, int *frame_count, AVPacket *pkt, int last)
 {
+    int i;
+    int idx;
+    int color_idx;
     int len, got_frame;
     char buf[1024];
-    int YLen  = 0;
-    int CbLen = 0;
-    int CrLen = 0;
 
     len = avcodec_decode_video2(avctx, frame, &got_frame, pkt);
     if(len < 0){
@@ -47,27 +33,16 @@ static int decode_write_frame(const char *outfilename, AVCodecContext *avctx,
         fflush(stdout);
 
         //the picture is allocated by the decoder, no need to free it
-        //pgm_save(frame->data[0], frame->linesize[0],
-        //        frame->width, frame->height, buf);
-        //(*frame_count)++;
-        
-        YLen  = (frame->height*frame->width)*1.5;
-        CbLen = (frame->height>>1)*(frame->width>>1);
-        CrLen = (frame->height>>1)*(frame->width>>1);
+        (*frame_count)++;
 
-        fwrite(frame->data[0],1, YLen, pOutput_File);
-        frame->data[0] += YLen;
-        /*
-        fwrite(frame->data[0],1, CbLen, pOutput_File);
-        frame->data[0] += CbLen;
-        fwrite(frame->data[0],1, CrLen, pOutput_File);
-        frame->data[0] += CrLen;
-        */
-    }
+        fwrite(frame->data[0], 1, frame->width*frame->height, pOutput_File); 
+        fwrite(frame->data[1], 1, (frame->width/2)*(frame->height/2), pOutput_File); 
+        fwrite(frame->data[2], 1, (frame->width/2)*(frame->height/2), pOutput_File); 
 
-    if(pkt->data){
-        pkt->size -= len;
-        pkt->data += len;
+        if(pkt->data){
+            pkt->size -= len;
+            pkt->data += len;
+        }
     }
 
     return 0;
@@ -165,9 +140,7 @@ int main(int argc, char **argv)
             if(pkt.size == 0){
                 continue;
             }
-            printf("Decode frame pts %d pkt.size %d\n", pkt.pts, pkt.size);
-
-
+            printf("Decode frame pts %d pkt.size %d\n", (int)pkt.pts, (int)pkt.size);
             
             if(decode_write_frame(Output_FileName, codecCtx, frame, &frame_count, &pkt, 0) < 0){
                 exit(1);
@@ -176,5 +149,15 @@ int main(int argc, char **argv)
         }
     }
 
+    //decode the data in the decoder itself
+    pkt.size = 0;
+    pkt.data = NULL;
+    decode_write_frame(Output_FileName, codecCtx, frame, &frame_count, &pkt, 0);
+
+    fclose(pInput_File);
+    fclose(pOutput_File);
+    av_frame_free(&frame);
+
     return 0;
 }
+
