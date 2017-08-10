@@ -17,12 +17,13 @@ all:
 ##	$(CC) -O0 -g demuxer.c -o demuxer -L$(DIR_LIB) -I$(DIR_INC) $(LIBS)
 ##	$(CC) -O0 -g muxer.c -o muxer -L$(DIR_LIB) -I$(DIR_INC) $(LIBS)
 ##	$(CC) -O0 -g filter.c -o filter -L$(DIR_LIB) -I$(DIR_INC) $(LIBS)
+	$(CC) -O0 -g scaling.c -o scaling -L$(DIR_LIB) -I$(DIR_INC) $(LIBS)
 ##	$(CC) -O0 -g screen_capture.c -o screen_capture -L$(DIR_LIB) -I$(DIR_INC) $(LIBS)
-	$(CC) -O0 -g ffmpeg_streamer.c -o ffmpeg_streamer -L$(DIR_LIB) -I$(DIR_INC) $(LIBS)
-	$(CC) -O0 -g ffmpeg_receive.c -o ffmpeg_receive -L$(DIR_LIB) -I$(DIR_INC) $(LIBS)
+##	$(CC) -O0 -g ffmpeg_streamer.c -o ffmpeg_streamer -L$(DIR_LIB) -I$(DIR_INC) $(LIBS)
+##	$(CC) -O0 -g ffmpeg_receive.c -o ffmpeg_receive -L$(DIR_LIB) -I$(DIR_INC) $(LIBS)
 
 clean:
-	rm demuxing_decoding metadata container_parse encoder decoder demuxer
+	rm demuxing_decoding metadata container_parse encoder decoder demuxer scaling
 
 .PHONY:clean 
 
